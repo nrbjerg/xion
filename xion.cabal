@@ -1,0 +1,67 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.36.0.
+--
+-- see: https://github.com/sol/hpack
+
+name:           xion
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/nrbjerg/xion#readme>
+homepage:       https://github.com/nrbjerg/xion#readme
+bug-reports:    https://github.com/nrbjerg/xion/issues
+author:         Martin Sig Nørbjerg
+maintainer:     martin1509@outlook.dk
+copyright:      2024 Martin Sig Nørbjerg
+license:        MIT
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    CHANGELOG.md
+
+source-repository head
+  type: git
+  location: https://github.com/nrbjerg/xion
+
+library
+  exposed-modules:
+      FOF
+      Lib
+      TPTPParser
+      Transformations
+  other-modules:
+      Paths_xion
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+  build-depends:
+      base >=4.7 && <5
+    , megaparsec
+  default-language: Haskell2010
+
+executable xion-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_xion
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , megaparsec
+    , xion
+  default-language: Haskell2010
+
+test-suite xion-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_xion
+  hs-source-dirs:
+      test
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , megaparsec
+    , xion
+  default-language: Haskell2010
