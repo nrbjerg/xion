@@ -53,8 +53,8 @@ parsePredicate = do
 
 -- | Parsing of quantified formulas
 {-# INLINABLE parseVariableList #-}
-parseVariableList :: Parser [Term]
-parseVariableList = parseVariable `sepBy` char ','
+parseVariableList :: Parser [Id]
+parseVariableList = (parseAlphaNumWordStartingWith upperChar) `sepBy` char ','
 
 parseQuantified :: Parser FOF
 parseQuantified = try (aux "![" (:!:)) <|> aux "?[" (:?:) where

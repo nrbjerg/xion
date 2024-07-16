@@ -27,8 +27,8 @@ library
   exposed-modules:
       FOF
       Lib
+      Prenex
       TPTPParser
-      Transformations
   other-modules:
       Paths_xion
   hs-source-dirs:
@@ -37,6 +37,7 @@ library
   build-depends:
       base >=4.7 && <5
     , megaparsec
+    , tuple
   default-language: Haskell2010
 
 executable xion-exe
@@ -49,6 +50,7 @@ executable xion-exe
   build-depends:
       base >=4.7 && <5
     , megaparsec
+    , tuple
     , xion
   default-language: Haskell2010
 
@@ -63,5 +65,6 @@ test-suite xion-test
   build-depends:
       base >=4.7 && <5
     , megaparsec
+    , tuple
     , xion
   default-language: Haskell2010
