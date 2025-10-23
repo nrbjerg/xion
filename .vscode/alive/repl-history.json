@@ -1,1 +1,1 @@
-[]
+[{"pkgName":"cl-user","text":"(model-objective-sense)"},{"pkgName":"cl-user","text":"(model:model-objective-sense)"},{"pkgName":"cl-user","text":"(model:create-model)"},{"pkgName":"cl-user","text":"(setq a :a)"},{"pkgName":"cl-user","text":"(eq :a :a)"}]
