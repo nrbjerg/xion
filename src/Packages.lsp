@@ -16,7 +16,7 @@
     (:export :convert-milpmodel-to-standard-form))
 
 (defpackage :simplex
-    (:use :cl :model)
+    (:use :cl :model :lla)
     (:export :solve-LP-relaxation))
 
 (defpackage :xion
