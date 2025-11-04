@@ -16,8 +16,16 @@ class Variable:
         """Initializes a new binary variable"""
         return Variable(identifier, True, l = 0.0, u = 1.0)
 
+    @staticmethod
+    def new_continuous(identifier: str, l: Optional[float] = None, u: Optional[float] = None) -> Variable:
+        """Initializes a new binary variable"""
+        return Variable(identifier, False, l = l, u = u)
+
     def __add__(self, other: Union[Variable, LinearCombination]) -> LinearCombination:
         """Adds two variables together or adds the variable to a linear combination."""
+        if isinstance(other, (int, float)) and (other == 0.0 or other == 0): # NOTE: needed to enable the use of the sum function.
+            return self
+
         if not isinstance(other, (Variable, LinearCombination)):
             raise TypeError(f"Variable {Variable.identifier} was summed with something which was not another Variable or a LinearCombination: {other}")
             
@@ -28,6 +36,10 @@ class Variable:
             # Add the variable to the other linear combination
             other.weights[self] = 1.0
             return other 
+
+    def __radd__ (self, other) -> LinearCombination:
+        """Needed to enable addition."""
+        return self.__add__(other)
 
     def __mul__ (self, other: Scalar) -> LinearCombination:
         """Multiples the variable by a scalar value, creating a linear combination."""
