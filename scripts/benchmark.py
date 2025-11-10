@@ -95,9 +95,9 @@ def generate_CFLP(n: int, m: int, seed: int) -> Tuple[float, MILP]:
 
 def benchmark(repeats: int = 8) -> float:
     problem_types_and_generators = {
-        #"BMDKP": lambda seed: generate_BMDKP(64, 16, seed = seed),
-        #"SCP": lambda seed: generate_SCP(1024, 96, seed = seed),
-        "CFLP": lambda seed: generate_CFLP(256, 64, seed = seed),
+        "BMDKP": lambda seed: generate_BMDKP(64, 32, seed = seed),
+        "SCP": lambda seed: generate_SCP(512, 96, seed = seed),
+        "CFLP": lambda seed: generate_CFLP(128, 48, seed = seed),
     }
     times: Dict[str, List[float]] = {}
     for problem_type, generator in problem_types_and_generators.items():
@@ -115,6 +115,9 @@ def benchmark(repeats: int = 8) -> float:
         json.dump(times, file)
 
 if __name__ == "__main__":
-    benchmark(1)
+    #benchmark(repeats=16)
+    obj_val_from_gurobi, milp = generate_BMDKP(64, 16, seed = 0)
+    obj_val_from_xion, _ = solve(milp)
+    print(obj_val_from_gurobi, obj_val_from_xion)
     
     

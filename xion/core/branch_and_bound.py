@@ -2,48 +2,63 @@ import scipy.optimize as opt
 import numpy as np
 from xion.types import Matrix, Vector
 from xion.models.canonical_form import CanonicalForm
-from typing import List, Tuple
+from typing import List, Tuple, Optional
+from dataclasses import dataclass
+import heapq
 
-def branch_and_bound(problem: CanonicalForm) -> Tuple[float, Vector]:
+@dataclass(order=True)
+class Node: 
+    """Stores all of the information needed in a branch and bound node."""
+    lp_obj: float
+    lp_sol: Vector
+    bounds: Matrix
+
+def branch_and_bound(problem: CanonicalForm) -> Optional[Tuple[float, Vector]]:
     """Implements a simple branch and bound algorithm for solving a canonical MILP, 
-       i.e. a problem as described in xion.models.canonical_form.py"""
+       i.e. a problem as described in xion.models.canonical_form.py, additionally it uses
+       best-bound node selection, strong-branching (TODO) and """
     best_sol = None
     best_obj_val = np.inf
 
-    # TODO: Prioritize the bounds based on their coefficients in the objective function somehow.
-    stack: List[Tuple[Vector, Vector]] = [(problem.l, problem.u)]
+    # Solve the original LP-relaxation to the MILP, and add it to the set of open nodes.
+    original_bounds = np.vstack([problem.l, problem.u]).T
+    print(original_bounds.shape)
+    res = opt.linprog(problem.c, A_eq=problem.A, b_eq=problem.b, bounds=original_bounds)
+    if not res.success: 
+        # NOTE: If the original LP relaxation to the MILP problem is infeasible, then the MILP is likewise infeasible
+        return None 
+    open_nodes: List[Node] = [Node(lp_obj=res.fun, lp_sol=np.array(res.x), bounds=original_bounds)]
+    heapq.heapify(open_nodes)
+
     nodes_evaluated = 0
-
-    while stack:
+    while len(open_nodes) != 0:
         nodes_evaluated += 1
-        bounds_at_node = stack.pop()
-        
-        # Solve the LP relaxation of the problem
-        res = opt.linprog(problem.c, A_eq = problem.A, b_eq = problem.b, bounds = np.vstack([bounds_at_node[0].T, bounds_at_node[1].T]).T)
-
-        # Check for infeasibility and if so simply skip the value or if the value of the LP relaxation
-        # is higher than the current best feasible value we may skip it.
-        if not res.success or res.fun >= best_obj_val:
-            continue
+        node: Node = heapq.heappop(open_nodes)
         
         for i in problem.integral_indices:
             # If one of the values which should be integral is not integral we branch.
-            if not np.isclose(res.x[i], np.round(res.x[i])):
-                val = res.x[i]
+            if not np.isclose(node.lp_sol[i], np.round(node.lp_sol[i])):
+                for j in range(2):
+                    # Solve the LP relaxation of the branched sub problems
+                    bounds = np.copy(node.bounds)
+                    if j == 0:
+                        bounds[i, 0] = np.ceil(node.lp_sol[i])
+                    else:
+                        bounds[i, 1] = np.floor(node.lp_sol[i])
 
-                new_l = bounds_at_node[0].copy()
-                new_l[i] = np.ceil(val)
-                stack.append((new_l, bounds_at_node[1]))
+                    res = opt.linprog(problem.c, A_eq = problem.A, b_eq = problem.b, bounds = bounds)
 
-                new_u = bounds_at_node[1].copy()
-                new_u[i] = np.floor(val)
-                stack.append((bounds_at_node[0], new_u))
+                    # Performs pruning by checking if the LP-relaxation was solvable (otherwise the MILP subproblem is not)
+                    # and by checking if the minima for the relaxation was lower than the best objective value (of the MILP)
+                    if res.success and res.fun <= best_obj_val:
+                        heapq.heappush(open_nodes, Node(lp_obj=res.fun, lp_sol=res.x, bounds = bounds))
+
                 break
 
         # NOTE: We have already checked if res.fun >= best_obj_val, so we now know that the solution is the current best.
         else: 
-            best_sol = res.x
-            best_obj_val = res.fun
+            best_sol = node.lp_sol
+            best_obj_val = node.lp_obj 
             continue
 
     return best_obj_val, best_sol
