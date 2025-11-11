@@ -115,9 +115,9 @@ def benchmark(repeats: int = 8) -> float:
         json.dump(times, file)
 
 if __name__ == "__main__":
-    #benchmark(repeats=16)
-    obj_val_from_gurobi, milp = generate_BMDKP(64, 16, seed = 0)
-    obj_val_from_xion, _ = solve(milp)
-    print(obj_val_from_gurobi, obj_val_from_xion)
+    benchmark(repeats=16)
+    #obj_val_from_gurobi, milp = generate_BMDKP(64, 32, seed = 9)
+    #obj_val_from_xion, _ = solve(milp)
+    #print(obj_val_from_gurobi, obj_val_from_xion)
     
     
