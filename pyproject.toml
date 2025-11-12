@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "xion"
-version = "0.0.1"
+version = "0.0.3"
 description = "A simple MILP solver written in Python"
 readme = "README.md"
 license = { text = "MIT" }
