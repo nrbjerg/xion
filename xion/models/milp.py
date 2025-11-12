@@ -2,6 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from xion.types import Matrix, Vector, Scalar, ComparisonOperator, ObjectiveSense
 from typing import List, Optional, Union, Dict
+import numpy as np
 
 @dataclass
 class Variable:
@@ -119,15 +120,30 @@ class Constraint:
 
 @dataclass
 class MILP:
-    """Models a general MILP, which can later be converted into an equivalent one of canonical form"""
+    """Models a general MILP."""
     identifier: str
     vars: List[Variable]
     cons: List[Constraint]
     obj_fun: LinearCombination
     obj_sense: ObjectiveSense
+    integral_mask: Vector = field(init=False)
+    integral_indices: Vector = field(init=False)
+
+    def __post_init__(self):
+        """Initialize information about the indices of integral variables."""
+        self.integral_mask = np.array([var.integral for var in self.vars])
+        self.integral_indices = np.array([i for i, var in enumerate(self.vars) if var.integral])
 
     def __repr__(self) -> str:
         """Returns a string representation of the MILP"""
         return f"Problem: {self.identifier}\n {self.obj_sense} {self.obj_fun} \n st: " + "\n     ".join(con.__repr__() for con in self.cons) + "\n     " + "\n     ".join(var.repr_with_constraints() for var in self.vars)
+
+    def get_lower_bounds (self) -> Vector:
+        """Gets the lower bounds of the variables""" 
+        return np.array([var.l for var in self.vars], dtype=np.double)
+
+    def get_upper_bounds (self) -> Vector:
+        """Gets the upper bounds of the variables""" 
+        return np.array([var.u for var in self.vars], dtype=np.double)
 
     
