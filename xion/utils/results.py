@@ -10,7 +10,7 @@ def convert_solver_result_to_MILP_result(sol: Tuple[float, Vector], problem: MIL
     if problem.obj_sense == "max":
         obj_val *= -1.0
         
-    vals_of_milp_vars = {var: int(val) if np.isclose(val, np.round(val), atol=1e-6) else val 
+    vals_of_milp_vars = {var: int(val) if np.isclose(val, np.round(val), atol=1e-9) else val 
                          for var, val in zip(problem.vars, vals_of_vars)}
 
     return obj_val, vals_of_milp_vars
