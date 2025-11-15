@@ -11,6 +11,7 @@ class LPRelaxationSolver:
         self.h = Highs()
         self.h.setOptionValue("output_flag", False)
         self.h.setOptionValue("log_to_console", False)
+        self.h.setOptionValue("simplex_strategy", 1) # DUAL
 
     def solve (self, lp_relaxation: HighsLp, warm_start_basis: Optional[HighsBasis] = None) -> Optional[Tuple[float, HighsModelStatus, Vector, Optional[HighsBasis]]]:
         """Solves the given lp_relaxation problem, via warm-starting if a basis is given."""

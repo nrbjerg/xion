@@ -41,16 +41,11 @@ class Node:
     basis: Optional[HighsBasis] = field(compare=False)
     bounds: Matrix = field(compare=False)
 
-def branch_and_bound(problem: MILP, time_budget: Optional[float] = None, alpha: float = 0.5, verbose: bool = False) -> Optional[Tuple[float, Vector]]:
+def branch_and_bound(problem: MILP, time_budget: Optional[float] = None, alpha: float = 0.5, 
+                     verbose: bool = False, debug: bool = False) -> Optional[Tuple[float, Vector]]:
     """Implements a simple branch and bound algorithm for solving a MILP, 
        i.e. a problem as described in xion.models.milp.py, additionally it uses
        best-bound node selection, strong-branching and warm-starting of the LP-relaxation solver."""
-    logger.remove()
-    logger.add(
-        sys.stderr,
-        format="<blue>{time:HH:mm:ss}</blue> <level>{level}</level>: {message}",
-        colorize=True
-    )
     A = np.array([[con.lc.weights.get(var, 0.0) for var in problem.vars] for con in problem.cons], dtype=np.double)
     best_var_ass = None
     best_obj_val = np.inf
@@ -88,27 +83,24 @@ def branch_and_bound(problem: MILP, time_budget: Optional[float] = None, alpha: 
             best_obj_val = obj_val
             best_var_ass = rounded_sol 
         
+        # Perform strong-branching on the found variables.
+        strong_branching_best_var_idx = None
+        strong_branching_best_score = -np.inf 
+
         # Set bounds of the LP-relaxation, according to those of the node.
         lp_relaxation.col_lower_ = node.bounds[:, 0]
         lp_relaxation.col_upper_ = node.bounds[:, 1]
-
-        # Perform strong-branching on the found variables.
-        strong_branching_best_nodes = []
-        strong_branching_best_score = -np.inf 
-
-        for var_idx in find_candidate_branching_vars(node.lp_sol, problem.integral_indices, k = 1):
-            # TODO: Do something to minimize the copying, do we really need to copy everything instead of simply modifying the node bounds.
-            lower_branching_bounds, upper_branching_bounds = node.bounds.copy(), node.bounds.copy()
-            lower_branching_bounds[var_idx] = (node.bounds[var_idx][0], np.floor(node.lp_sol[var_idx]))
-            upper_branching_bounds[var_idx] = (np.ceil(node.lp_sol[var_idx]), node.bounds[var_idx][1]) 
-
-            # Compute LP-relaxations
-            lp_relaxation.col_lower_ = lower_branching_bounds[:, 0]
-            lp_relaxation.col_upper_ = lower_branching_bounds[:, 1]
+        lp_relaxation_solver.h.setOptionValue("max_simplex_iterations", 2)
+        for var_idx in find_candidate_branching_vars(node.lp_sol, problem.integral_indices, k = 4):
+            # NOTE: compute approximation of lower branching lp-relaxation:
+            lp_relaxation.col_upper_[var_idx] = np.floor(node.lp_sol[var_idx])
             lower_res = lp_relaxation_solver.solve(lp_relaxation, node.basis)
-            lp_relaxation.col_lower_ = upper_branching_bounds[:, 0]
-            lp_relaxation.col_upper_ = upper_branching_bounds[:, 1]
+            
+            # NOTE: compute approximation of upper branching lp-relaxation:
+            lp_relaxation.col_upper_[var_idx] = node.bounds[var_idx, 1]
+            lp_relaxation.col_lower_[var_idx] = np.ceil(node.lp_sol[var_idx])
             upper_res = lp_relaxation_solver.solve(lp_relaxation, node.basis)
+            lp_relaxation.col_lower_[var_idx] = node.bounds[var_idx, 0]
 
             # NOTE: Check if the LP-relaxation is still feasible otherwise we know that we do not need to branch any 
             #       further down this branch, since we will at some point have to fix variable i, (as it cannot be fractional).
@@ -118,13 +110,27 @@ def branch_and_bound(problem: MILP, time_budget: Optional[float] = None, alpha: 
             upper_inc = np.inf if upper_res == None else upper_res[0] - node.lp_obj
 
             if (score := (min(lower_inc, upper_inc) + alpha * max(lower_inc, upper_inc)) > strong_branching_best_score):
-                strong_branching_best_score = score
-                strong_branching_best_nodes = [Node(*res, bounds=branching_bounds) 
-                                               for res, branching_bounds in zip([lower_res, upper_res], [lower_branching_bounds, upper_branching_bounds]) if res != None]
+                strong_branching_best_var_idx = var_idx
+                if score == np.inf:
+                    break
 
-        # NOTE: If the list is empty then the node was infeasible, and hence it can have no descendants in the MILP search tree.
-        for strong_branching_node in strong_branching_best_nodes:
-            heapq.heappush(open_nodes, strong_branching_node)
+                strong_branching_best_score = score
+
+        # NOTE: we reuse the nodes bounds directly instead of copying, since it will not be utilized any in further computation?
+        lp_relaxation_solver.h.setOptionValue("max_simplex_iterations", 8192)
+        lower_branching_bounds = node.bounds.copy()
+        lower_branching_bounds[strong_branching_best_var_idx, 0] = np.ceil(node.lp_sol[strong_branching_best_var_idx])
+        node.bounds[strong_branching_best_var_idx, 1] = np.floor(node.lp_sol[strong_branching_best_var_idx]) 
+        for branching_bounds in [lower_branching_bounds, node.bounds]:
+            # NOTE: If the list is empty then the node was infeasible, and hence it can have no descendants in the MILP search tree.
+            lp_relaxation.col_lower_ = branching_bounds[:, 0]
+            lp_relaxation.col_upper_ = branching_bounds[:, 1]
+            res = lp_relaxation_solver.solve(lp_relaxation, node.basis)
+            if res != None and res[0] < best_obj_val: 
+                heapq.heappush(open_nodes, Node(*res, bounds=branching_bounds))
+
+        if debug and (len(open_nodes) % 1000) == 0:
+            logger.debug(f"We currently have: {len(open_nodes)} open nodes.")
 
     if verbose:
         logger.success(f"Branch and bound evaluated {nodes_evaluated} nodes in {time.perf_counter() - start_time:.1f} seconds.")
