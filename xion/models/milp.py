@@ -18,8 +18,13 @@ class Variable:
         return Variable(identifier, True, l = 0.0, u = 1.0)
 
     @staticmethod
+    def new_integer(identifier: str, l: Optional[float] = None, u: Optional[float] = None) -> Variable:
+        """Initializes a new integer variable"""
+        return Variable(identifier, True, l = l, u = u)
+
+    @staticmethod
     def new_continuous(identifier: str, l: Optional[float] = None, u: Optional[float] = None) -> Variable:
-        """Initializes a new binary variable"""
+        """Initializes a new continuous variable"""
         return Variable(identifier, False, l = l, u = u)
 
     def __add__(self, other: Union[Variable, LinearCombination]) -> LinearCombination:
@@ -28,7 +33,7 @@ class Variable:
             return self
 
         if not isinstance(other, (Variable, LinearCombination)):
-            raise TypeError(f"Variable {Variable.identifier} was summed with something which was not another Variable or a LinearCombination: {other}")
+            raise TypeError(f"Variable {self.identifier} was summed with something which was not another Variable or a LinearCombination: {other} of type {type(other)}")
             
         if isinstance(other, Variable):
             return LinearCombination({self: 1.0, other: 1.0})
@@ -41,6 +46,20 @@ class Variable:
     def __radd__ (self, other) -> LinearCombination:
         """Needed to enable addition."""
         return self.__add__(other)
+
+    # FIXME: This might introduce a bug
+    def __sub__ (self, other: Union[Variable, LinearCombination, Scalar]) -> LinearCombination:
+        """Subtracts an element from the current element"""
+        return self.__add__((-1.0) * other)
+
+    # FIXME: This might introduce a bug
+    def __rsub__ (self, other: Union[Variable, LinearCombination, Scalar]) -> LinearCombination:
+        """Subtracts an element from the current element"""
+        return self.__radd__((-1.0) * other)
+
+    def __neg__ (self) -> LinearCombination:
+        """Negates the variable, creating a linear combination."""
+        return (-1.0) * self
 
     def __mul__ (self, other: Scalar) -> LinearCombination:
         """Multiples the variable by a scalar value, creating a linear combination."""
@@ -77,7 +96,7 @@ class LinearCombination:
             return self
 
         if not isinstance(other, (Variable, LinearCombination)):
-            raise TypeError(f"Linear Combination {self.__repr__()} was summed with something which was not neither a Variable or a another LinearCombination: {other}")
+            raise TypeError(f"Linear Combination {self.__repr__()} was summed with something which was not neither a Variable or a another LinearCombination: {other}, which was of type {type(other)}")
             
         if isinstance(other, Variable):
             self.weights[other] = 1.0
@@ -93,6 +112,20 @@ class LinearCombination:
         """Adds either a variable or a another linear combination to the linear combination"""
         return self.__add__(other)
 
+    # FIXME: This might introduce a bug
+    def __sub__ (self, other: Union[Variable, LinearCombination, Scalar]) -> LinearCombination:
+        """Subtracts an element from the current element"""
+        return self.__add__(-1.0 * other)
+
+    # FIXME: This might introduce a bug
+    def __rsub__ (self, other: Union[Variable, LinearCombination, Scalar]) -> LinearCombination:
+        """Subtracts an element from the current element"""
+        return self.__radd__(-1.0 * other)
+
+    def __neg__ (self) -> LinearCombination:
+        """Negates the variable, creating a linear combination."""
+        return (-1.0) * self
+
     def __mul__ (self, other: Scalar) -> LinearCombination:
         """Multiples the variable by a scalar value, creating a linear combination."""
         if not isinstance(other, (int, float)): # NOTE: isinstance does not work with Union, so we cannot check the scalar type directly.
@@ -103,9 +136,14 @@ class LinearCombination:
         
         return self
 
+    def __rmul__ (self, other: Scalar) -> LinearCombination:
+        """Multiples the variable by a scalar value, creating a linear combination."""
+        return self.__mul__(other)
+        
+
     def __repr__ (self) -> str:
         """Returns a string representation of the Linear Combination."""
-        return "".join(f"{self.weights[var]}{var.identifier} + " for var in sorted(self.weights.keys(), key=lambda var: var.identifier))[:-2]
+        return "".join(f"{self.weights[var]}*{var.identifier} + " for var in sorted(self.weights.keys(), key=lambda var: var.identifier))[:-2]
 
 @dataclass 
 class Constraint:
@@ -113,6 +151,11 @@ class Constraint:
     lc: LinearCombination
     rel: ComparisonOperator
     rhs: Scalar
+
+    def __post_init__(self):
+        """Convert any variable given as the linear combination to a linear combination"""
+        if type(self.lc) == Variable:
+            self.lc = LinearCombination({self.lc: 1.0})
 
     def __repr__ (self) -> str:
         """Returns a string representation of the constraint"""
@@ -145,5 +188,3 @@ class MILP:
     def get_upper_bounds (self) -> Vector:
         """Gets the upper bounds of the variables""" 
         return np.array([var.u for var in self.vars], dtype=np.double)
-
-    

@@ -1,5 +1,6 @@
 from highspy import HighsBasis, HighsSolution, HighsModelStatus
 import scipy.optimize as opt
+import time
 import numpy as np
 from xion.types import Matrix, Vector
 from xion.models.milp import MILP
@@ -9,11 +10,13 @@ import heapq
 from numba import njit
 from xion.core.solve_lp_relaxation import LPRelaxationSolver
 from xion.models.HiGHS_model import convert_MILP_to_HiGHS_lp_relaxation
+from xion.utils.results import convert_solver_result_to_MILP_result
+from loguru import logger
 
 @njit()
 def is_integral(lp_sol: Vector, integrality_mask: Vector) -> bool:
     """Checks if the solution (lp_sol) to the LP-relaxation, is a solution to the MILP."""
-    return np.all(np.isclose(lp_sol[integrality_mask], np.round(lp_sol[integrality_mask]), atol=1e-6))
+    return np.all(np.isclose(lp_sol[integrality_mask], np.round(lp_sol[integrality_mask]), atol=1e-9))
 
 @njit()
 def find_candidate_branching_vars(lp_sol: Vector, integral_indices: Vector, k: int) -> Vector:
@@ -22,7 +25,7 @@ def find_candidate_branching_vars(lp_sol: Vector, integral_indices: Vector, k: i
                                np.ceil(lp_sol[integral_indices]) - lp_sol[integral_indices])
 
     candidates = integral_indices[np.argpartition(-fractionality, k - 1)[:k]]
-    non_integer_candidates = candidates[~np.isclose(lp_sol[candidates], np.round(lp_sol[candidates]), atol=1e-6)]
+    non_integer_candidates = candidates[~np.isclose(lp_sol[candidates], np.round(lp_sol[candidates]), atol=1e-9)]
     return non_integer_candidates
 
     #j = 0
@@ -47,11 +50,11 @@ class Node:
     basis: Optional[HighsBasis] = field(compare=False)
     bounds: Matrix = field(compare=False)
 
-def branch_and_bound(problem: MILP, alpha: float = 0.5) -> Optional[Tuple[float, Vector]]:
+def branch_and_bound(problem: MILP, time_budget: Optional[float] = None, alpha: float = 0.5, verbose: bool = False) -> Optional[Tuple[float, Vector]]:
     """Implements a simple branch and bound algorithm for solving a MILP, 
        i.e. a problem as described in xion.models.milp.py, additionally it uses
        best-bound node selection, strong-branching and warm-starting of the LP-relaxation solver."""
-    best_sol = None
+    best_var_ass = None
     best_obj_val = np.inf
     lp_relaxation = convert_MILP_to_HiGHS_lp_relaxation(problem)
     lp_relaxation_solver = LPRelaxationSolver()
@@ -60,20 +63,24 @@ def branch_and_bound(problem: MILP, alpha: float = 0.5) -> Optional[Tuple[float,
     root_bounds = np.column_stack([problem.get_lower_bounds(), problem.get_upper_bounds()]) 
 
     root_res = lp_relaxation_solver.solve(lp_relaxation, None) 
+    # NOTE: If the original LP relaxation to the MILP problem is infeasible, then the MILP is likewise infeasible
     if root_res is None: 
-        # NOTE: If the original LP relaxation to the MILP problem is infeasible, then the MILP is likewise infeasible
+        if verbose:
+            logger.info(f"The MILP problem {problem.identifier} was infeasible as the root LP-relaxation was infeasible")
         return None 
+
     open_nodes: List[Node] = [Node(*root_res, bounds=root_bounds)]
     heapq.heapify(open_nodes)
 
+    start_time = time.perf_counter()
     nodes_evaluated = 0
-    while len(open_nodes) != 0:
+    while len(open_nodes) != 0 and ((time_budget is None) or (time.perf_counter() - start_time <= time_budget)):
         nodes_evaluated += 1
         node: Node = heapq.heappop(open_nodes)
     
         # NOTE: Since we are using best-bound node selection, the first solution found is indeed the best possible solution.
         if is_integral(node.lp_sol, problem.integral_mask):
-            return node.lp_obj, node.lp_sol
+            return (node.lp_obj, node.lp_sol)
         
         # Set bounds of the LP-relaxation, according to those of the node.
         lp_relaxation.col_lower_ = node.bounds[:, 0]
@@ -112,3 +119,7 @@ def branch_and_bound(problem: MILP, alpha: float = 0.5) -> Optional[Tuple[float,
         # NOTE: If the list is empty then the node was infeasible, and hence it can have no descendants in the MILP search tree.
         for strong_branching_node in strong_branching_best_nodes:
             heapq.heappush(open_nodes, strong_branching_node)
+
+    if verbose:
+        logger.info(f"Branch and bound evaluated {nodes_evaluated} nodes in {time.perf_counter() - start_time:.2f} seconds.")
+    return None if best_obj_val == np.inf else (best_obj_val, best_var_ass)
