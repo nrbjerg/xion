@@ -21,11 +21,12 @@ class LPRelaxationSolver:
 
         # Check feasibility of the LP-relaxation
         status = self.h.getModelStatus()
-        if status == HighsModelStatus.kInfeasible:
+        obj_val = self.h.getInfo().objective_function_value 
+        if status == HighsModelStatus.kInfeasible or np.isnan(obj_val):
             return None
         else:
             basis = self.h.getBasis()
             sol = np.array(list(self.h.getSolution().col_value))
-            return [self.h.getInfo().objective_function_value, status, sol, basis if basis.valid else None]
+            return [obj_val, status, sol, basis if basis.valid else None]
 
     
