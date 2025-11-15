@@ -25,5 +25,5 @@ def generate_BMDKP(n: int, m: int, seed: int) -> Tuple[float, MILP]:
     cons = [Constraint(sum(weights[j, i] * xs[i] for i in range(n)), "<=", capacities[j]) for j in range(m)]
     obj_fun = sum(values[i] * xs[i] for i in range(n))
 
-    return (model.ObjVal, MILP(f"BMDKP{seed}", xs, cons, obj_fun, obj_sense="max"))
+    return ((model.ObjVal, model.Runtime), MILP(f"BMDKP{seed}", xs, cons, obj_fun, obj_sense="max"))
 

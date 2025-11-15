@@ -23,4 +23,4 @@ def generate_MC(n: int, seed: int, density: float = 0.8) -> Tuple[float, MILP]:
     obj_fun = sum([xs[j] for j in range(n)])
     cons = [Constraint(xs[i] + xs[j], "<=", 1.0) for j in range(n) for i in range(n) if i != j and adjacency_matrix[i, j] != 1]
 
-    return (model.ObjVal, MILP(f"MC{seed}", xs, cons, obj_fun, obj_sense="max"))
+    return ((model.ObjVal, model.Runtime), MILP(f"MC{seed}", xs, cons, obj_fun, obj_sense="max"))

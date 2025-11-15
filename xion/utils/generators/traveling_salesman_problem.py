@@ -32,4 +32,4 @@ def generate_TSP(n: int, seed: int) -> Tuple[float, MILP]:
             [Constraint(us[0], "=", 1)] +
             [Constraint(us[i] - us[j] + n * xs[i][j], "<=", n - 1) for i in range(1, n) for j in range(1, n) if i != j])
 
-    return (model.ObjVal, MILP(f"SCP{seed}", us + sum(xs, []), cons, obj_fun, obj_sense="min"))
+    return ((model.ObjVal, model.Runtime), MILP(f"SCP{seed}", us + sum(xs, []), cons, obj_fun, obj_sense="min"))

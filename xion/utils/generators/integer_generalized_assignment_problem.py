@@ -28,5 +28,5 @@ def generate_IGAP(n: int, m: int, seed: int) -> Tuple[Optional[float], MILP]:
     cons = ([Constraint(sum(resource_utilization[i, j] * xs[i][j] for i in range(n)), "<=", capacities[j]) for j in range(m)] + 
             [Constraint(sum(xs[i][j] for j in range(m)), "<=", max_units[i]) for i in range(n)])
 
-    return (model.ObjVal, MILP(f"IGAP{seed}", sum(xs, []), cons, obj_fun, obj_sense="max"))
+    return ((model.ObjVal, model.Runtime), MILP(f"IGAP{seed}", sum(xs, []), cons, obj_fun, obj_sense="max"))
 

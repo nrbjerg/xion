@@ -43,4 +43,4 @@ def generate_ULS(n: int, seed: int) -> Tuple[float, MILP]:
             [Constraint(i_vars[t-1] + xs[t] - i_vars[t], ">=", demands[t]) for t in range(1, n)] + 
             [Constraint(xs[t] - M * ys[t], "<=", 0.0) for t in range(n)])
 
-    return (model.ObjVal, MILP(f"ULS{seed}", ys + xs + i_vars, cons, obj_fun, obj_sense="min"))
+    return ((model.ObjVal, model.Runtime), MILP(f"ULS{seed}", ys + xs + i_vars, cons, obj_fun, obj_sense="min"))
