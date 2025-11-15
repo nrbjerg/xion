@@ -16,8 +16,8 @@ def convert_MILP_to_HiGHS_lp_relaxation(problem: MILP) -> HiGHS.HighsLp:
         lp.col_cost_ = np.array([problem.obj_fun.weights.get(var, 0) for var in problem.vars], dtype=np.double)
     else:
         lp.col_cost_ = np.array([-problem.obj_fun.weights.get(var, 0) for var in problem.vars], dtype=np.double)
-    lp.col_lower_ = np.array([var.l for var in problem.vars], dtype=np.double)
-    lp.col_upper_ = np.array([var.u for var in problem.vars], dtype=np.double)
+    lp.col_lower_ = np.array([var.l if not (var.l is None) else -HiGHS.kHighsInf for var in problem.vars], dtype=np.double)
+    lp.col_upper_ = np.array([var.u if not (var.u is None) else HiGHS.kHighsInf for var in problem.vars], dtype=np.double)
 
     # 2. Add the constraints to the LP-relaxation.
     lp.row_lower_ = np.array([con.rhs if con.rel != "<=" else -HiGHS.kHighsInf for con in problem.cons], dtype=np.double)
