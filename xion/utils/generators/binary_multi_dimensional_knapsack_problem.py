@@ -5,7 +5,7 @@ from typing import Tuple
 from xion.models.milp import MILP, Constraint, Variable
 
 def generate_BMDKP(n: int, m: int, seed: int) -> Tuple[float, MILP]:
-    """Generates and solves a Binary Multi Dimensional Knapsack Problem, returning both the objective value and the MILP model"""
+    """Generates and solves a Binary Multi Dimensional Knapsack Problem (n: items, m: dimensions), returning both the objective value and the MILP model"""
     np.random.seed(seed)
     values = np.round(np.random.uniform(size=n), 3)
     weights = np.round(np.random.uniform(size=(m, n)), 3)
