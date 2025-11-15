@@ -1,5 +1,8 @@
 {
 	"cSpell.words": [
-		"linprog"
+		"gurobi",
+		"highspy",
+		"linprog",
+		"Uncapacitated"
 	]
 }
