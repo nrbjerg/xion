@@ -25,7 +25,7 @@ def generate_TSP(n: int, seed: int) -> Tuple[float, MILP]:
 
     # Setup MILP 
     xs = [[Variable.new_binary(f"x{i, j}") for i in range(n)] for j in range(n)]
-    us = [Variable.new_continuous(f"u{i}", l = 1.0, u = float(n)) for i in range(n)]
+    us = [Variable.new_continuous(f"u{i}", lb = 1.0, ub = float(n)) for i in range(n)]
     obj_fun = sum(dists[i, j] * xs[i][j] for i in range(n) for j in range(n))
     cons = ([Constraint(sum(xs[i][j] for j in range(n) if i != j), "=", 1.0) for i in range(n)] + 
             [Constraint(sum(xs[j][i] for j in range(n) if i != j), "=", 1.0) for i in range(n)] + 

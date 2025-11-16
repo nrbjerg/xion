@@ -8,15 +8,15 @@ def generate_BP(n: int, m: int, seed: int) -> Tuple[Optional[float], MILP]:
     """Generates and solves a 1D Bin-Packing Problem (n: items, m: maximum number of bins), returning both the objective value and the MILP model"""
     np.random.seed(seed)
     sizes = np.round(np.random.uniform(size=n), 3)
-    C = np.random.exponential((sum(sizes) * m) / 4)
+    C = max(max(sizes), sum(sizes) / m) * (1 + np.abs(np.random.normal())) 
 
     # Compute exact solution using Gurobi
-    model = gp.Model(f"BMDKP{seed}")
+    model = gp.Model(f"BP{seed}")
     model.setParam("OutputFlag", 0)
     x = model.addVars(n, m, vtype=GRB.BINARY, name="x")
     y = model.addVars(m, vtype=GRB.BINARY, name="y")
 
-    model.setObjective(gp.quicksum(y[j] for j in range(m)), GRB.MAXIMIZE)
+    model.setObjective(gp.quicksum(y[j] for j in range(m)), GRB.MINIMIZE)
     model.addConstrs((gp.quicksum(sizes[i] * x[i,j] for i in range(n)) - C * y[j] <= 0 for j in range(m)))
     model.addConstrs((gp.quicksum(x[i,j] for j in range(m)) == 1.0 for i in range(n)))
     model.optimize()
@@ -28,5 +28,5 @@ def generate_BP(n: int, m: int, seed: int) -> Tuple[Optional[float], MILP]:
     cons = ([Constraint(sum(sizes[i] * xs[i][j] for i in range(n)) - C * ys[j], "<=", 0) for j in range(m)] + 
             [Constraint(sum(xs[i][j] for j in range(m)), "=", 1.0) for i in range(n)])
 
-    return ((model.ObjVal, model.Runtime), MILP(f"BP{seed}", ys + sum(xs, []), cons, obj_fun, obj_sense="max"))
+    return ((model.ObjVal, model.Runtime), MILP(f"BP{seed}", ys + sum(xs, []), cons, obj_fun, obj_sense="min"))
 

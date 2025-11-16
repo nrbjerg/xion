@@ -18,6 +18,7 @@
    - [x] Uncapacitated Facility Location
    - [ ]
 - [x] Create a variable assignment evaluator.
+- [-] Check if optimal solution must be integer.
 # V0.0.5 
 - [ ] Improve python MILP interface 
    - [ ] Add support for variables on the RHS when defining constraints 

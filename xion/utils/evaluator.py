@@ -4,11 +4,7 @@ from xion.utils.results import convert_solver_result_to_MILP_result
 from xion import solve
 from typing import Tuple, Dict, Optional
 from xion.types import Scalar, Vector, Matrix
-from xion.utils.feasibility import compute_number_of_violated_constraints
  
-def evaluate_milp_at_var_ass(milp: MILP, var_ass: Dict[Variable, Scalar]) -> Optional[Scalar]:
+def evaluate_milp_at_var_ass(milp: MILP, var_ass: Dict[Variable, Scalar]) -> Scalar:
     """Tries to evaluate the MILP at the given variable assignment, returns None if the variable assignment is infeasible"""
-    if compute_number_of_violated_constraints(milp, var_ass) != 0:
-        return None
-    
     return sum(milp.obj_fun.weights.get(var, 0.0) * var_ass[var] for var in milp.vars)

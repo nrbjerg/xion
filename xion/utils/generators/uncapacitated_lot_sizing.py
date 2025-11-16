@@ -34,9 +34,9 @@ def generate_ULS(n: int, seed: int) -> Tuple[float, MILP]:
     model.optimize()
 
     # Setup MILP 
-    xs = [Variable.new_continuous(f"x{t}", l=0.0) for t in range(n)]
+    xs = [Variable.new_continuous(f"x{t}", lb=0.0) for t in range(n)]
     ys = [Variable.new_binary(f"y{t}") for t in range(n)]
-    i_vars = [Variable.new_continuous(f"i{t}", l=0.0) for t in range(n)]
+    i_vars = [Variable.new_continuous(f"i{t}", lb=0.0) for t in range(n)]
     obj_fun = sum(setup_costs[t] * ys[t] + production_costs[t] * xs[t] + holding_costs[t] * i_vars[t] for t in range(n))
     cons = ([Constraint(i_vars[0], "=", 0.0)] +
             [Constraint(xs[0], ">=", demands[0])] +

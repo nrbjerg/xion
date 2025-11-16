@@ -10,7 +10,7 @@ def generate_SCP(n: int, m: int, seed: int, density: float = 0.1) -> Tuple[float
     covers = (np.random.uniform(size=(n, m)) < density).astype(int)
     for j in range(m):
         if covers[:, j].sum() == 0: # NOTE: ensure that each element i are covered by at least one set, so that the problem is not infeasible.
-            covers[np.random.randint(0, m), j] = 1
+            covers[np.random.randint(0, n), j] = 1
     
     costs = np.random.uniform(size=n)
 

@@ -9,23 +9,23 @@ class Variable:
     """Models a variable in a MILP."""
     identifier: str
     integral: bool
-    l: Optional[float] = None
-    u: Optional[float] = None
+    lb: Optional[float] = None
+    ub: Optional[float] = None
 
     @staticmethod
     def new_binary(identifier: str) -> Variable:
         """Initializes a new binary variable"""
-        return Variable(identifier, True, l = 0.0, u = 1.0)
+        return Variable(identifier, True, lb = 0.0, ub = 1.0)
 
     @staticmethod
-    def new_integer(identifier: str, l: Optional[float] = None, u: Optional[float] = None) -> Variable:
+    def new_integer(identifier: str, lb: Optional[float] = None, ub: Optional[float] = None) -> Variable:
         """Initializes a new integer variable"""
-        return Variable(identifier, True, l = l, u = u)
+        return Variable(identifier, True, lb = lb, ub = ub)
 
     @staticmethod
-    def new_continuous(identifier: str, l: Optional[float] = None, u: Optional[float] = None) -> Variable:
+    def new_continuous(identifier: str, lb: Optional[float] = None, ub: Optional[float] = None) -> Variable:
         """Initializes a new continuous variable"""
-        return Variable(identifier, False, l = l, u = u)
+        return Variable(identifier, False, lb = lb, ub = ub)
 
     def __add__(self, other: Union[Variable, LinearCombination]) -> LinearCombination:
         """Adds two variables together or adds the variable to a linear combination."""
@@ -81,14 +81,14 @@ class Variable:
 
     def repr_with_constraints(self) -> str:
         """Returns a string representation of the variable and its constraints"""
-        return (f"{self.l} <= " if self.l is not None else "") + self.identifier + (f" <= {self.u}" if self.u is not None else "") + " integral" if self.integral else ""
+        return (f"{self.lb} <= " if self.lb is not None else "") + self.identifier + (f" <= {self.ub}" if self.ub is not None else "") + " integral" if self.integral else ""
         
 
 
 @dataclass
 class LinearCombination:
     """Models a linear combination consisting of multiple variables with weights"""
-    weights: Dict[Variable, float] = field(default_factory=dict)
+    weights: Dict[Variable, Scalar] = field(default_factory=dict)
 
     def __add__ (self, other: Union[Variable, LinearCombination, Scalar]) -> LinearCombination:
         """Adds either a variable or a another linear combination to the linear combination"""
@@ -174,6 +174,9 @@ class MILP:
 
     def __post_init__(self):
         """Initialize information about the indices of integral variables."""
+        if type(self.obj_fun) == Variable:
+            self.obj_fun = LinearCombination(weights={self.obj_fun: 1.0})
+        
         self.integral_mask = np.array([var.integral for var in self.vars])
         self.integral_indices = np.array([i for i, var in enumerate(self.vars) if var.integral])
 
@@ -183,8 +186,8 @@ class MILP:
 
     def get_lower_bounds (self) -> Vector:
         """Gets the lower bounds of the variables""" 
-        return np.array([var.l for var in self.vars], dtype=np.double)
+        return np.array([var.lb for var in self.vars], dtype=np.double)
 
     def get_upper_bounds (self) -> Vector:
         """Gets the upper bounds of the variables""" 
-        return np.array([var.u for var in self.vars], dtype=np.double)
+        return np.array([var.ub for var in self.vars], dtype=np.double)
