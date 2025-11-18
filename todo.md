@@ -26,7 +26,8 @@
 # V0.0.6 Presolving
 - [ ] Check if optimal solution must be integer.
 
-# V0.0.7
+# V0.0.7 Heuristics
+# V0.0.9
 - [ ] Improve python MILP interface 
    - [ ] Add support for variables on the RHS when defining constraints 
    - [ ] Add support for the use of <= = and >= directly within python to create constraints

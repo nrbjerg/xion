@@ -219,4 +219,4 @@ __marimo__/
 
 # Utilized within development.
 test.py
-logs/*
+benchmarks/logs/*
