@@ -3,22 +3,6 @@ A *pure* python implementation of a branch and bound MILP solver, originally cre
 
 I say *pure* since it uses HiGHS (for now through scipy.optimize.linprog) to solve the LP-relaxations of the MILP under the hood, which is a major part of the computational burden when solving MILP problems. 
 
-## Install guide
-Currently the Xion package is not available through PyPi package manager.
-
-However to *install* Xion, from source, simply clone the repository, install the requirements through pip and install the package. This can be accomplished by running the following commands:
-```
-git clone https://github.com/nrbjerg/xion
-cd xion
-pip install -r requirements.txt
-pip install .
-```
-
-To *uninstall* Xion along with any installed *all* of its requirements (**NOTE:** Please check to see if requirements.txt contains any previously installed packages and act accordingly.) simply run:
-```
-pip uninstall -r requirements.txt
-pip uninstall xion
-```
 ## Example: Solving the 0-1 Knapsack problem using Xion 
 Below you will find a simple illustrative example of how the Xion library can be utilized to solve a simple binary knapsack problem.
 
@@ -45,6 +29,23 @@ if (sol := solve(problem, verbose=True)) != None: # solve will return None if th
         print(f"{x} = {var_ass[x]}")
 ```
 For more examples please check the [xion/utils/generators](https://github.com/nrbjerg/xion/tree/main/xion/utils/generators) directory, which contains several general well known MILP problem formulations utilized for benchmarking the Xion solver.
+
+## Install guide
+Currently the Xion package is not available through PyPi package manager.
+
+However to *install* Xion, from source, simply clone the repository, install the requirements through pip and install the package. This can be accomplished by running the following commands:
+```
+git clone https://github.com/nrbjerg/xion
+cd xion
+pip install -r requirements.txt
+pip install .
+```
+
+To *uninstall* Xion along with any installed *all* of its requirements (**NOTE:** Please check to see if requirements.txt contains any previously installed packages and act accordingly.) simply run:
+```
+pip uninstall -r requirements.txt
+pip uninstall xion
+```
 
 ## Features
 At the moment, the following features is implemented within the Xion solver:
