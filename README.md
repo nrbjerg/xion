@@ -46,18 +46,19 @@ if (sol := solve(problem, verbose=True)) != None: # solve will return None if th
 ```
 For more examples please check the [xion/utils/generators](https://github.com/nrbjerg/xion/tree/main/xion/utils/generators) directory, which contains several general well known MILP problem formulations utilized for benchmarking the Xion solver.
 
-## Development Roadmap
+## Features
 At the moment, the following features is implemented within the Xion solver:
 - [x] *Reliability Branching* on integral variables.
 - [x] Basic *Branch and Bound* search using *Best-Bound Node Selection*.
 - [x] Basic *library interface*, as illustrated in the knapsack example.
 
-Below is a list of features which are currently in the works:
+### Development Roadmap
+Below is a list of features which are currently in the works for the main solver:
 - [ ] *Heuristics* (TBD)
 - [ ] *Presolving* (TBD)
 - [ ] *Cutting Planes* (TBD)
 - [ ] *Hybrid Branching* by combining: *Inference & Reliability Branching*
-- [ ] Interface / API
-    - [ ] Adding support for *lazy constraint callbacks* (for instance DFJ subtour elimination constraints for TSP).
-    - [ ] Improve constraint definitions: utilize the comparisons operators: '<=', '=' and '>=', directly to construct constraints through operator overloading.
+- [ ] *Interface* Improvements: 
+    - [ ] Support for *lazy constraint callbacks* (such as lazily adding DFJ subtour elimination constraints for the TSP).
+    - [ ] Utilize the comparisons operators: '<=', '=' and '>=', directly to construct constraints through operator overloading.
     - [ ] Add support for variables on the right hand side of constraints.
