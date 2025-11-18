@@ -16,10 +16,18 @@
    - [x] Max Clique
    - [x] Traveling Salesman (MTZ formulation)
    - [x] Uncapacitated Facility Location
-   - [ ]
+   - [x] Uncapacitated lot sizing
 - [x] Create a variable assignment evaluator.
-- [-] Check if optimal solution must be integer.
-# V0.0.5 
+- [x] Create a feasibility checker.
+# V0.0.5 Reliability Branching
+- [ ] Reliability Branching
+   - [ ] Implement strong-branching
+   - [ ] Implement pseudo-costs 
+- [ ] Investigate if it may have been user error, in creating invalid bounds for variables within HiGHS (forgot to copy.).
+# V0.0.6 Presolving
+- [ ] Check if optimal solution must be integer.
+
+# V0.0.7
 - [ ] Improve python MILP interface 
    - [ ] Add support for variables on the RHS when defining constraints 
    - [ ] Add support for the use of <= = and >= directly within python to create constraints

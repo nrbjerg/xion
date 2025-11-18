@@ -29,4 +29,6 @@ def generate_UFL(n: int, m: int, seed: int) -> Tuple[float, MILP]:
     cons = ([Constraint(sum(xs[i][j] for j in range(m)), "=", 1.0) for i in range(n)] + 
             [Constraint(xs[i][j] - ys[j], "<=", 0.0) for j in range(m) for i in range(n)]) 
 
-    return ((model.ObjVal, model.Runtime), MILP(f"SCP{seed}", ys + sum(xs, []), cons, obj_fun, obj_sense="min"))
+    vars = ys + sum(xs, [])
+    np.random.shuffle(vars)
+    return ((model.ObjVal, model.Runtime), MILP(f"SCP{seed}", vars, cons, obj_fun, obj_sense="min"))

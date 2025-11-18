@@ -7,10 +7,10 @@ from xion.models.milp import MILP, Constraint, Variable
 def generate_IGAP(n: int, m: int, seed: int) -> Tuple[Optional[float], MILP]:
     """Generates and solves a Integer Generalized Assignment Problem (n: jobs, m: agents), returning both the objective value and the MILP model"""
     np.random.seed(seed)
-    resource_utilization = np.random.randint(1, 5, size=(n,m))
+    resource_utilization = np.random.uniform(0.2, 1, size=(n,m))
     capacities = (1 + np.random.lognormal(size=m)) * max(np.sum(resource_utilization, axis=1))
     max_units = np.random.randint(1, 5, size=(n)) 
-    profits = resource_utilization + np.random.randint(1, 5, size=(n,m))
+    profits = resource_utilization + np.random.uniform(0.2, 1, size=(n,m))
 
     # Compute exact solution using Gurobi
     model = gp.Model(f"IGAP{seed}")
@@ -28,5 +28,7 @@ def generate_IGAP(n: int, m: int, seed: int) -> Tuple[Optional[float], MILP]:
     cons = ([Constraint(sum(resource_utilization[i, j] * xs[i][j] for i in range(n)), "<=", capacities[j]) for j in range(m)] + 
             [Constraint(sum(xs[i][j] for j in range(m)), "<=", max_units[i]) for i in range(n)])
 
-    return ((model.ObjVal, model.Runtime), MILP(f"IGAP{seed}", sum(xs, []), cons, obj_fun, obj_sense="max"))
+    vars = sum(xs, [])
+    np.random.shuffle(vars)
+    return ((model.ObjVal, model.Runtime), MILP(f"IGAP{seed}", vars, cons, obj_fun, obj_sense="max"))
 

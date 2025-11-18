@@ -1,5 +1,5 @@
-"numpy"
-"numba"
-"higspy"
-"pytest"
-"loguru"
+numpy
+numba
+highspy
+pytest
+loguru

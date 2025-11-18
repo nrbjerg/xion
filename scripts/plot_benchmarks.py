@@ -21,7 +21,7 @@ def plot_benchmarks_as_violin_plots(versions: Iterable[str]):
     widths = 0.8 / (2 * len(versions))
     for idx, (version, color) in enumerate(zip(versions, version_colors)):
         # Load benchmark results
-        with open(os.path.join(os.getcwd(), "benchmarks", f"xion{version}.json"), "r") as file:
+        with open(os.path.join(os.getcwd(), "logs", "benchmarks", f"xion{version}.json"), "r") as file:
             times: Dict[str, List[float]] = json.load(file)
 
         # Make violin plots center around each problem

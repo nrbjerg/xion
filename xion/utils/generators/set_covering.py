@@ -27,4 +27,5 @@ def generate_SCP(n: int, m: int, seed: int, density: float = 0.1) -> Tuple[float
     obj_fun = sum([costs[i] * xs[i] for i in range(n)])
     cons = [Constraint(sum(covers[i, j] * xs[i] for i in range(n)), ">=", 1.0) for j in range(m)]
 
+    np.random.shuffle(xs)
     return ((model.ObjVal, model.Runtime), MILP(f"SCP{seed}", xs, cons, obj_fun, obj_sense="min"))

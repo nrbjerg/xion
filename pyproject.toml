@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "xion"
-version = "0.0.3"
-description = "A simple MILP solver written in Python"
+version = "0.0.5"
+description = "A simple MILP solver written 'purely' in Python"
 readme = "README.md"
 license = { text = "MIT" }
 authors = [{ name = "Martin Sig Nørbjerg", email = "martin1509@outlook.com" }]
-requires-python = ">=3.12.3"
-dependencies = ["numpy", "numba", "scipy", "pytest", "loguru"]
+requires-python = ">=3.10.3"
+dependencies = ["numpy", "numba", "scipy", "matplotlib", "pytest", "loguru"]

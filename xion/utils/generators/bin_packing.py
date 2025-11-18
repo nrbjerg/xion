@@ -27,6 +27,8 @@ def generate_BP(n: int, m: int, seed: int) -> Tuple[Optional[float], MILP]:
     obj_fun = sum(ys[j] for j in range(m))
     cons = ([Constraint(sum(sizes[i] * xs[i][j] for i in range(n)) - C * ys[j], "<=", 0) for j in range(m)] + 
             [Constraint(sum(xs[i][j] for j in range(m)), "=", 1.0) for i in range(n)])
-
-    return ((model.ObjVal, model.Runtime), MILP(f"BP{seed}", ys + sum(xs, []), cons, obj_fun, obj_sense="min"))
+    
+    vars = sum(xs, []) + ys
+    np.random.shuffle(vars)
+    return ((model.ObjVal, model.Runtime), MILP(f"BP{seed}", vars, cons, obj_fun, obj_sense="min"))
 

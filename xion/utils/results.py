@@ -1,10 +1,9 @@
 from typing import Tuple, Dict
 from xion.models.milp import MILP
 from xion.types import Vector, Scalar, Solution
-from xion.core.presolver import RecoveryPipeline
 import numpy as np
 
-def convert_solver_result_to_MILP_result(sol: Solution, problem: MILP, rp: RecoveryPipeline) -> Tuple[float, Dict[str, Scalar]]:
+def convert_solver_result_to_MILP_result(sol: Solution, problem: MILP) -> Tuple[float, Dict[str, Scalar]]:
     """Converts the solver results to the a human friendly format (i.e. for instance 
        going from back to max instead of min as the objective)"""
     # Load variable values both form the found solution (to the presolved problem and from the recovery pipeline.)
