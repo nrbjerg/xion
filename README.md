@@ -1,8 +1,10 @@
 # Xion
-A "pure" python implementation of a branch and bound MILP solver, created for educational purposes. I say "pure" since it uses HiGHS (through scipy.optimize.linprog) to solve the LP-relaxations of the MILP under the hood, which is a major part of the computational burden when solving MILP problems.
+A *pure* python implementation of a branch and bound MILP solver, originally created for educational purposes. This has however changed as development progressed - The behind the development of Xion is now to to make the *fastest pure python MILP solver* possible. 
+
+I say *pure* since it uses HiGHS (for now through scipy.optimize.linprog) to solve the LP-relaxations of the MILP under the hood, which is a major part of the computational burden when solving MILP problems. 
 
 ## Install guide
-For now (I expect in perpetuity), the Xion package is not available through PyPi.
+Currently the Xion package is not available through PyPi package manager.
 
 However to *install* Xion, from source, simply clone the repository, install the requirements through pip and install the package. This can be accomplished by running the following commands:
 ```
@@ -12,12 +14,11 @@ pip install -r requirements.txt
 pip install .
 ```
 
-To *uninstall* Xion and its requirements simply run:
+To *uninstall* Xion along with any installed *all* of its requirements (**NOTE:** Please check to see if requirements.txt contains any previously installed packages and act accordingly.) simply run:
 ```
 pip uninstall -r requirements.txt
 pip uninstall xion
 ```
-
 ## Example: Solving the 0-1 Knapsack problem using Xion 
 Below you will find a simple illustrative example of how the Xion library can be utilized to solve a simple binary knapsack problem.
 
@@ -43,5 +44,20 @@ if (sol := solve(problem, verbose=True)) != None: # solve will return None if th
     for x in xs:
         print(f"{x} = {var_ass[x]}")
 ```
+For more examples please check the [xion/utils/generators](https://github.com/nrbjerg/xion/tree/main/xion/utils/generators) directory, which contains several general well known MILP problem formulations utilized for benchmarking the Xion solver.
 
-## Key Features & Development Roadmap
+## Development Roadmap
+At the moment, the following features is implemented within the Xion solver:
+- [x] *Reliability Branching* on integral variables.
+- [x] Basic *Branch and Bound* search using *Best-Bound Node Selection*.
+- [x] Basic *library interface*, as illustrated in the knapsack example.
+
+Below is a list of features which are currently in the works:
+- [ ] *Heuristics* (TBD)
+- [ ] *Presolving* (TBD)
+- [ ] *Cutting Planes* (TBD)
+- [ ] *Hybrid Branching* by combining: *Inference & Reliability Branching*
+- [ ] Interface / API
+    - [ ] Adding support for *lazy constraint callbacks* (for instance DFJ subtour elimination constraints for TSP).
+    - [ ] Improve constraint definitions: utilize the comparisons operators: '<=', '=' and '>=', directly to construct constraints through operator overloading.
+    - [ ] Add support for variables on the right hand side of constraints.

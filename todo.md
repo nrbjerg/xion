@@ -3,7 +3,6 @@
 - [x] Implement basic branch-and-bound solver
 # V0.0.2 Branch-and-Bound improvements
 - [x] Implement best-bound node selection
-- [x] Implement strong branching
 # V0.0.3 Direct HiGHS interface & warm starting
 - [x] Move directly to HiGHS instead of working through the scipy wrapper.
 - [x] Implement warm starting HiGHS
@@ -20,9 +19,9 @@
 - [x] Create a variable assignment evaluator.
 - [x] Create a feasibility checker.
 # V0.0.5 Reliability Branching
-- [ ] Reliability Branching
-   - [ ] Implement strong-branching
-   - [ ] Implement pseudo-costs 
+- [x] Reliability Branching
+   - [x] Implement strong-branching
+   - [x] Implement pseudo-costs 
 - [ ] Investigate if it may have been user error, in creating invalid bounds for variables within HiGHS (forgot to copy.).
 # V0.0.6 Presolving
 - [ ] Check if optimal solution must be integer.
