@@ -55,13 +55,18 @@ At the moment, the following features is implemented within the Xion solver:
 
 ### Development Roadmap
 Below is a list of features which are currently in the works for the main solver:
+
 **Heuristics:** 
 - [ ] *Feasibility Pump* (objective version)
 - [ ] *Relaxation Induced Neighborhood Search (RINS)*
+
 **Presolving:** (TBD)
+
 **Cutting Planes:** (TBD)
+
 **General Solver Improvements:**
   - [ ] *Hybrid Branching* by combining: *Inference & Reliability Branching*
+
 **Interface Improvements:** 
   - [ ] Support for *lazy constraint callbacks* (such as lazily adding DFJ subtour elimination constraints for the TSP).
   - [ ] Utilize the comparisons operators: '<=', '=' and '>=', directly to construct constraints through operator overloading.
