@@ -217,4 +217,6 @@ __marimo__/
 
 .venv/*
 
+# Utilized within development.
 test.py
+logs/*

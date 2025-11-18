@@ -1,18 +1,24 @@
 # Xion
 A "pure" python implementation of a branch and bound MILP solver, created for educational purposes. I say "pure" since it uses HiGHS (through scipy.optimize.linprog) to solve the LP-relaxations of the MILP under the hood, which is a major part of the computational burden when solving MILP problems.
 
-## Install
-To install xion (locally) simply clone the repository, install the requirements through pip and install the package via the following commands:
+## Install guide
+For now (I expect in perpetuity), the Xion package is not available through PyPi.
+
+However to *install* Xion, from source, simply clone the repository, install the requirements through pip and install the package. This can be accomplished by running the following commands:
 ```
 git clone https://github.com/nrbjerg/xion
+cd xion
 pip install -r requirements.txt
 pip install .
 ```
 
-## Key Features 
+To *uninstall* Xion and its requirements simply run:
+```
+pip uninstall -r requirements.txt
+pip uninstall xion
+```
 
-
-## Example
+## Example: Solving the 0-1 Knapsack problem using Xion 
 Below you will find a simple illustrative example of how the Xion library can be utilized to solve a simple binary knapsack problem.
 
 ```python
@@ -37,3 +43,5 @@ if (sol := solve(problem, verbose=True)) != None: # solve will return None if th
     for x in xs:
         print(f"{x} = {var_ass[x]}")
 ```
+
+## Key Features & Development Roadmap
