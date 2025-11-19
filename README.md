@@ -1,10 +1,10 @@
 # Xion
 A *pure* python implementation of a branch and bound MILP solver, originally created for educational purposes. This has however changed as development progressed - The behind the development of Xion is now to to make the *fastest pure python MILP solver* possible. 
 
-I say *pure* since it uses HiGHS (for now through scipy.optimize.linprog) to solve the LP-relaxations of the MILP under the hood, which is a major part of the computational burden when solving MILP problems. 
+I say *pure* since it uses [HiGHS](https://highs.dev) (for now through [scipy.optimize.linprog](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.linprog.html)) to solve the LP-relaxations of the MILP under the hood, which is a major part of the computational burden when solving MILP problems. 
 
 ## Example: Solving the 0-1 Knapsack problem using Xion 
-Below you will find a simple illustrative example of how the Xion library can be utilized to solve a simple binary knapsack problem.
+Below you will find a simple illustrative example of how the Xion library can be utilized to solve a simple 0-1 knapsack problem.
 
 ```python
 from xion import MILP, Constraint, Variable, solve
@@ -19,12 +19,12 @@ C = sum(w) / 2 # Capacity of the knapsack.
 xs = [Variable.new_binary(f"x{i}") for i in range(N)] 
 cons = [Constraint(sum(w[i] * xs[i] for i in range(N)), "<=", C)]
 obj_fun = sum(v[i] * xs[i] for i in range(N))
-problem = MILP("knapsack problem", xs, cons, obj_fun, obj_sense="max")
+problem = MILP("Knapsack Problem", xs, cons, obj_fun, obj_sense="max")
 
 # solve the actual MILP using Xion.
 if (sol := solve(problem, verbose=True)) != None: # solve will return None if the problem is infeasible.
     obj_val, var_ass = sol
-    print(f"Found an optimal solution to the knapsack problem, with an objective of {obj_val:.3f}, the solution is:")
+    print(f"Optimal solution (with an objective of {obj_val:.3f}) is:")
     for x in xs:
         print(f"{x} = {var_ass[x]}")
 ```
@@ -54,18 +54,20 @@ At the moment, the following features is implemented within the Xion solver:
 - [x] Basic *library interface*, as illustrated in the knapsack example.
 
 ### Development Roadmap
-Below is a list of features which are currently in the works for the main solver:
+Below you will find an overview for some of the features which will (*hopefully*) be implemented within future Xion versions.
 
 **Heuristics:** 
-- [ ] *Feasibility Pump* (objective version)
+- [ ] *Feasibility Pump* / *Objective Feasibility Pump* 
 - [ ] *Relaxation Induced Neighborhood Search (RINS)*
 
-**Presolving:** (TBD)
+**Presolving:** (TBD, still researching)
+- [ ] *Domain propagation*
 
-**Cutting Planes:** (TBD)
+**Cutting Planes:** (TBD, still researching)
 
 **General Solver Improvements:**
   - [ ] *Hybrid Branching* by combining: *Inference & Reliability Branching*
+  - [ ] *Warm Starting* through HiGHS directly, instead of relying on the rather restrictive but otherwise absolutely excellent scipy.optimize.linprog api
 
 **Interface Improvements:** 
   - [ ] Support for *lazy constraint callbacks* (such as lazily adding DFJ subtour elimination constraints for the TSP).
