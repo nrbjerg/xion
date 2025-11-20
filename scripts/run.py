@@ -16,7 +16,8 @@ from xion.utils.feasibility import compute_number_of_violated_constraints
 
 if __name__ == "__main__":
 
-    (obj_val_from_gurobi, gurobi_run_time), milp = generate_BMDKP(128, 8, seed=6)
+    (obj_val_from_gurobi, gurobi_run_time), milp = generate_BMDKP(4, 1, seed=6)
+    print(milp)
     logger.info(f"gurobi obj: {obj_val_from_gurobi:.3f}, gurobi run time: {gurobi_run_time:.3f}s")
     obj_val_from_xion, var_ass_from_xion = solve(milp, verbose=True)
     logger.info(f"xion obj: {evaluate_milp_at_var_ass(milp, var_ass_from_xion):.3f}, number of cons violations: {compute_number_of_violated_constraints(milp, var_ass_from_xion, verbose=True)}")

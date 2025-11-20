@@ -2,7 +2,7 @@ from __future__ import annotations
 from xion.models.milp import MILP, Variable, Constraint, LinearCombination
 import numpy as np
 from xion.types import Matrix, Vector, Scalar, Solution
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Tuple
 from copy import deepcopy
 
@@ -21,6 +21,8 @@ class CanonicalForm:
     ub: Vector
     integral_mask: Vector 
     integral_indices: Vector
+
+    cn: float = field(init=False, default=0.0)
 
     @staticmethod
     def from_milp(problem: MILP) -> CanonicalForm:
@@ -65,13 +67,3 @@ class CanonicalForm:
         return CanonicalForm(c, A_ineq, b_ineq, A_eq, b_eq, lb, ub, integral_mask, integral_indices)
 
     # TODO: Does not yet support unbound variables
-    def convert_solution_to_milp_solution(self, sol: Solution, problem: MILP) -> Tuple[float, Dict[Variable, Scalar]]:
-        """Converts the solution to the problem in canonical form to one which is easily readable to MILP"""
-        obj_val, vals_of_canonical_vars = sol
-        if problem.obj_sense == "max":
-            obj_val *= -1.0
-        
-        vals_of_milp_vars = {var: int(round(val)) if np.isclose(val, np.round(val)) else val 
-                            for var, val in zip(problem.vars, vals_of_canonical_vars)}
-
-        return obj_val, vals_of_milp_vars

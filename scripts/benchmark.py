@@ -23,14 +23,14 @@ from xion.utils.feasibility import compute_number_of_violated_constraints
 def benchmark(repeats: int = 8) -> float:
     """Runs a benchmark on some simple MILP problems."""
     problem_types_and_generators: Dict[str, Callable[[int], Tuple[Scalar, MILP]]] = {
-        "IGAP(n=64, m=12)": lambda seed: generate_IGAP(64, 12, seed=seed),
-        "BMDKP(n=128, m=8)": lambda seed: generate_BMDKP(128, 8, seed = seed),
-        "SCP(n=1024, m=128)": lambda seed: generate_SCP(1024, 128, density = 0.02, seed = seed),
-        "UFL(n=256, m=64)": lambda seed: generate_UFL(256, 64, seed = seed),
-        "MC(n=96)": lambda seed: generate_MC(96, density=3/4, seed=seed),
-        "ETSP(n=12)": lambda seed: generate_ETSP(12, seed=seed),
-        "BP(n=64, m=8)": lambda seed: generate_BP(64, 8, seed=seed),
-        "ULS(n=32)": lambda seed: generate_ULS(32, seed=seed),
+        #"MC(n=96)": lambda seed: generate_MC(96, density=3/4, seed=seed),
+        #"IGAP(n=64, m=12)": lambda seed: generate_IGAP(64, 12, seed=seed),
+        #"BMDKP(n=128, m=8)": lambda seed: generate_BMDKP(128, 8, seed = seed),
+        #"SCP(n=1024, m=128)": lambda seed: generate_SCP(1024, 128, density = 0.05, seed = seed),
+        #"UFL(n=196, m=48)": lambda seed: generate_UFL(196, 48, seed = seed),
+        #"ETSP(n=12)": lambda seed: generate_ETSP(12, seed=seed),
+        #"ULS(n=48)": lambda seed: generate_ULS(48, seed=seed),
+        "BP(n=24, m=4)": lambda seed: generate_BP(24, 4, seed=seed),
     } 
     times: Dict[str, List[float]] = {}
     for problem_type, generator in problem_types_and_generators.items():
@@ -51,11 +51,11 @@ def benchmark(repeats: int = 8) -> float:
                     logger.error(f"Gurobi obj: {obj_val_from_gurobi}, XION obj: {obj_val_from_xion}")
                     logger.error(f"Had {compute_number_of_violated_constraints(milp, var_ass_from_xion)} violated constraints")
             
-        with open(os.path.join(os.getcwd(), "logs", f"{problem_type}.json"), "w+") as file:
+        with open(os.path.join(os.getcwd(), "benchmarks", "logs", f"{problem_type}.json"), "w+") as file:
             json.dump(times[problem_type], file)
 
     # Log the run times 
-    with open(os.path.join(os.getcwd(), "logs", "benchmarks", f"xion{xion.__version__}.json"), "w+") as file:
+    with open(os.path.join(os.getcwd(), "benchmarks", f"xion{xion.__version__}.json"), "w+") as file:
         json.dump(times, file)
 
 if __name__ == "__main__":

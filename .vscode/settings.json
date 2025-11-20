@@ -5,6 +5,7 @@
 		"highspy",
 		"ineq",
 		"linprog",
+		"presolve",
 		"presolved",
 		"presolving",
 		"Uncapacitated"

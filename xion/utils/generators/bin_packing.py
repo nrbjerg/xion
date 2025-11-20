@@ -7,7 +7,7 @@ from xion.models.milp import MILP, Constraint, Variable
 def generate_BP(n: int, m: int, seed: int) -> Tuple[Optional[float], MILP]:
     """Generates and solves a 1D Bin-Packing Problem (n: items, m: maximum number of bins), returning both the objective value and the MILP model"""
     np.random.seed(seed)
-    sizes = np.round(np.random.uniform(size=n), 3)
+    sizes = np.random.randint(n, size=n) #np.round(np.random.uniform(size=n), 1)
     C = max(max(sizes), sum(sizes) / m) * (1 + np.abs(np.random.normal())) 
 
     # Compute exact solution using Gurobi
@@ -22,7 +22,7 @@ def generate_BP(n: int, m: int, seed: int) -> Tuple[Optional[float], MILP]:
     model.optimize()
 
     # Setup MILP
-    ys = [Variable.new_binary(f"y{i}") for i in range(m)]
+    ys = [Variable.new_binary(f"y{j}") for j in range(m)]
     xs = [[Variable.new_binary(f"x{i, j}") for j in range(m)] for i in range(n)]
     obj_fun = sum(ys[j] for j in range(m))
     cons = ([Constraint(sum(sizes[i] * xs[i][j] for i in range(n)) - C * ys[j], "<=", 0) for j in range(m)] + 

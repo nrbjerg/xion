@@ -8,21 +8,17 @@ from dataclasses import dataclass, field
 import heapq
 from loguru import logger
 from numba import njit
-from xion.core.presolver import domain_propagation
 
-#@njit()
 def is_integral(x: Vector, integral_mask: Vector) -> bool:
     """Checks if the solution (lp_sol) to the LP-relaxation, is a solution to the MILP."""
     y = x[integral_mask]
     return np.all(np.isclose(y, np.round(y), atol=1e-6))
 
-#@njit()
 def compute_down_fractionality(x: Vector, integral_indices: Vector) -> Vector:
     """Computes the down fractionally of the variables which should be integral in x."""
     y = x[integral_indices]
     return y - np.floor(y)
 
-#@njit()
 def find_candidate_branching_variables(x: Vector, integral_indices: Vector, k: int) -> Vector:
     """Find good candidate branching variables, for now simply pick the k most fractional."""
     y = x[integral_indices]
@@ -43,6 +39,7 @@ def branch_and_bound(problem: CanonicalForm, k_branching_candidates: int = 4, k_
     """Implements a simple branch and bound algorithm for solving a canonical MILP, 
        i.e. a problem as described in xion.models.canonical_form.py, additionally it uses
        best-bound node selection, strong-branching (TODO) and pseudo-costs (TODO)"""
+    k_branching_candidates = min(k_branching_candidates, len(problem.integral_indices))
     N = problem.c.shape[0]
     primal_bound = np.inf
     primal_incumbent = None

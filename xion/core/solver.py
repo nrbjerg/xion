@@ -9,12 +9,13 @@ from xion.core.presolver import root_presolve
 
 def solve(problem: MILP, time_budget: Optional[float] = None, verbose: bool = False) -> Optional[Solution]:
     """Solves the supplied MILP hopefully within the time budget."""
-    #if (presolved_canonical_form := root_presolve(CanonicalForm.from_milp(problem))) != None:
-    presolved_canonical_form = CanonicalForm.from_milp(problem)
-    sol = branch_and_bound(presolved_canonical_form, time_budget=time_budget, verbose=verbose)
-    return presolved_canonical_form.convert_solution_to_milp_solution(sol, problem) if sol != None else None
-    #else:
-        #return None
+    #presolved_canonical_form = CanonicalForm.from_milp(problem)
+    if (root_presolve_res := root_presolve(CanonicalForm.from_milp(problem))) != None:
+        presolved_canonical_form, recovery_pipeline = root_presolve_res
+        sol = branch_and_bound(presolved_canonical_form, time_budget=time_budget, verbose=verbose)
+        return recovery_pipeline.convert_sol_of_presolved_problem_to_MILP_solution(sol, problem) if sol != None else None
+    else:
+        return None
 
 
 
